@@ -23,7 +23,7 @@ Pass `limit` (1-100) and the returned `nextCursor` to continue from the next tra
 
 ## Payment route coverage
 
-Run the focused payment-route suite and enforce per-route V8 coverage thresholds locally:
+Run the focused token-purchase and revenue-distribution route suites and enforce per-route V8 coverage thresholds locally:
 
 ```bash
 pnpm test:payment-coverage
