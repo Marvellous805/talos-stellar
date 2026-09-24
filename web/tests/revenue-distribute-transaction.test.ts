@@ -392,4 +392,30 @@ describe("Revenue distribution validation and preview", () => {
 
     expect(response.status).toBe(404);
   });
+  it("returns a privacy-safe 500 when the POST storage dependency fails", async () => {
+    mockDb.query.tlsTalos.findFirst.mockRejectedValue(new Error("database unavailable"));
+
+    const response = await distributePOST(
+      new NextRequest("http://localhost/api/talos/agent_1/revenue/distribute", {
+        method: "POST",
+        body: JSON.stringify({ requesterPublicKey: "GCREATOR" }),
+      }),
+      params,
+    );
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: "Internal server error" });
+  });
+
+  it("returns a privacy-safe 500 when the preview storage dependency fails", async () => {
+    mockDb.query.tlsTalos.findFirst.mockRejectedValue(new Error("database unavailable"));
+
+    const response = await distributePreviewGET(
+      new NextRequest("http://localhost/api/talos/agent_1/revenue/distribute"),
+      params,
+    );
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: "Internal server error" });
+  });
 });
