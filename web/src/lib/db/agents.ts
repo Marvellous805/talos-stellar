@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { db } from './client'; // Assuming a standard drizzle client export
-import { agents } from './schema'; // Assuming schema definition
+import { db } from "@/db";
+import { tlsTalos } from "@/db/schema";
 
 export interface AgentDetail {
   id: string;
@@ -16,8 +16,8 @@ export async function getAgentById(id: string): Promise<AgentDetail | null> {
   try {
     const result = await db
       .select()
-      .from(agents)
-      .where(eq(agents.id, id))
+      .from(tlsTalos)
+      .where(eq(tlsTalos.id, id))
       .limit(1);
 
     if (result.length === 0) {
@@ -28,7 +28,7 @@ export async function getAgentById(id: string): Promise<AgentDetail | null> {
     // Map to safe interface, excluding sensitive internal fields
     return {
       id: agent.id,
-      name: agent.name,
+      name: agent.agentName || agent.name,
       description: agent.description || '',
       status: agent.status || 'unknown',
       createdAt: agent.createdAt,

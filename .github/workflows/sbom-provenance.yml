@@ -598,7 +598,7 @@ jobs:
             --pyproject pyproject.toml \
             2>&1 | tee "${BASE}.cdx.log" || {
               echo "::warning::cyclonedx-py failed, generating fallback"
-              python3 << 'PYEOF'
+              python3 << PYEOF
           import json, tomllib, uuid, os
           base="${BASE}"
           with open("pyproject.toml","rb") as f: p=tomllib.load(f)

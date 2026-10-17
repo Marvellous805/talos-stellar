@@ -23,7 +23,7 @@ async function _POST(
 
     // Verify the message contains the TALOS ID to prevent replay across TALOSes
     if (!message.includes(id)) {
-      for (const tag of agentMutationTags(id)) revalidateTag(tag);
+      for (const tag of agentMutationTags(id)) revalidateTag(tag, "max");
     return Response.json(
         { error: "Signature message must contain the TALOS ID" },
         { status: 400 }

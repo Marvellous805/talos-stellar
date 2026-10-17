@@ -1,11 +1,10 @@
 // ── Client ────────────────────────────────────────────────────────
 
-export { TalosClient } from "./client.js";
+export { TalosClient, resolveRetryPolicy, resolveRetryOptions } from "./client.js";
 export type {
   TalosClientOptions,
   RetryPolicyOptions,
   RetryOptions,
-
   TalosErrorEvent,
   WriteOptions,
 } from "./client.js";
@@ -78,8 +77,8 @@ export {
 export {
   detectFeature,
   FeatureFlags,
-  FeatureStatus,
 } from "./features.js";
+export type { FeatureName, FeatureStatus } from "./features.js";
 
 // ── Domain types ──────────────────────────────────────────────────
 

@@ -109,6 +109,8 @@ pub enum ContractError {
     AlreadyRecovered = 15,
     /// Supplied patron shares do not sum to 100%.
     InvalidPatronShares = 16,
+    /// Stored patron shares are internally inconsistent and cannot be trusted.
+    InconsistentShareData = 17,
 }
 
 // ── Data types ───────────────────────────────────────────────────────────────
