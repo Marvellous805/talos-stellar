@@ -2369,11 +2369,11 @@ mod tests {
             }).unwrap_or(false)
         }).collect();
         assert_eq!(status_events.len(), 2);
-        let (_, _, rejected_data) = status_events[0];
+        let rejected_data = &status_events[0].2;
         let rejected_event: EventProposalStatusChanged = soroban_sdk::FromVal::from_val(&env, rejected_data);
         assert_eq!(rejected_event.proposal_id, rejected_id);
         assert_eq!(rejected_event.status, ProposalStatus::Rejected);
-        let (_, _, expired_data) = status_events[1];
+        let expired_data = &status_events[1].2;
         let expired_event: EventProposalStatusChanged = soroban_sdk::FromVal::from_val(&env, expired_data);
         assert_eq!(expired_event.proposal_id, expired_id);
         assert_eq!(expired_event.status, ProposalStatus::Rejected);
@@ -2419,7 +2419,7 @@ mod tests {
             }).unwrap_or(false)
         }).collect();
         assert_eq!(status_events.len(), 1);
-        let (_, _, data) = status_events[0];
+        let data = &status_events[0].2;
         let payload: EventProposalStatusChanged = soroban_sdk::FromVal::from_val(&env, data);
         assert_eq!(payload.proposal_id, proposal_id);
         assert_eq!(payload.status, ProposalStatus::Approved);
