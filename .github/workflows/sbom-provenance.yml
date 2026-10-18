@@ -639,9 +639,9 @@ jobs:
           SAFE_REF="${SAFE_REF//\//-}"
           BASE="${OUT_DIR}/talos-agent-${SAFE_REF}-$TS"
 
-          python3 << 'PYEOF'
+          BASE="$BASE" python3 << 'PYEOF'
           import json, tomllib, hashlib, uuid, os, datetime
-          base="${BASE}"
+          base=os.environ["BASE"]
           with open("pyproject.toml","rb") as f: p=tomllib.load(f)
           proj=p.get("project",{})
           deps = proj.get("dependencies",[])
