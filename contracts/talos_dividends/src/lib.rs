@@ -516,7 +516,8 @@ impl TalosDividends {
             treasury_share,
         )?;
         let dust_key = DataKey::RoundingDust(talos_id, epoch_id);
-        if let Some(recorded_dust) = env.storage().persistent().get(&dust_key) {
+        let recorded_dust: Option<i128> = env.storage().persistent().get(&dust_key);
+        if let Some(recorded_dust) = recorded_dust {
             if recorded_dust != dust {
                 return Err(ContractError::InconsistentShareData);
             }
@@ -1166,8 +1167,7 @@ mod tests {
                     sub_invokes: &[],
                 },
             }])
-            .recover_expired(&admin, &talos_id, &epoch_id)
-            .unwrap();
+            .recover_expired(&admin, &talos_id, &epoch_id);
 
         assert_eq!(recovered, 41); // 101 - floor(101 * 60 / 100)
     }
