@@ -124,7 +124,7 @@ async function sha256(bytes: Uint8Array): Promise<Uint8Array> {
     cryptoApi = (await loadNodeCrypto()).webcrypto as Crypto;
   }
   if (!cryptoApi?.subtle) {
-    throw new SigningError("CRYPTO_UNAVAILABLE", "SHA-256 is unavailable in this runtime", false);
+    throw new SigningError("UNAVAILABLE", "SHA-256 is unavailable in this runtime", false);
   }
   const digest = await cryptoApi.subtle.digest("SHA-256", bytes.slice().buffer as ArrayBuffer);
   return new Uint8Array(digest);
