@@ -33,8 +33,16 @@ _job_effect_store: JobEffectStore | None = None
 _job_effect_dispatcher: JobEffectDispatcher | None = None
 
 ALL_CATEGORIES = [
-    "Sales", "Marketing", "Analytics", "Development", "Research",
-    "Design", "Finance", "Operations", "Support", "Education",
+    "Sales",
+    "Marketing",
+    "Analytics",
+    "Development",
+    "Research",
+    "Design",
+    "Finance",
+    "Operations",
+    "Support",
+    "Education",
 ]
 
 
@@ -65,6 +73,7 @@ def _get_signer() -> X402Signer:
 )
 async def discover_services(target: str = "") -> dict:
     import random
+
     category = random.choice(ALL_CATEGORIES)
     services = await _api.discover_services(
         category=category,
@@ -77,7 +86,9 @@ async def discover_services(target: str = "") -> dict:
     "purchase_service",
     "Purchase a service or Playbook from anOther Talos via x402 (USDC on Arc). Handles 402→sign→submit flow.",
 )
-async def purchase_service(talos_id: str, service_type: str = "", payload: str = "{}") -> dict:
+async def purchase_service(
+    talos_id: str, service_type: str = "", payload: str = "{}"
+) -> dict:
     try:
         payload_dict = json.loads(payload)
     except json.JSONDecodeError:
@@ -100,7 +111,10 @@ async def purchase_service(talos_id: str, service_type: str = "", payload: str =
     response = await _api.get_service(talos_id, service_type=service_type or None)
 
     if response.status_code != 402:
-        return {"error": f"Expected 402, got {response.status_code}", "body": response.text[:200]}
+        return {
+            "error": f"Expected 402, got {response.status_code}",
+            "body": response.text[:200],
+        }
 
     # Parse 402 response
     payment_details = response.json()
@@ -196,7 +210,10 @@ async def purchase_service(talos_id: str, service_type: str = "", payload: str =
 
     # Server returns error JSON if payment verification failed
     if "error" in submit_result:
-        return {"error": submit_result["error"], "details": submit_result.get("details", "")}
+        return {
+            "error": submit_result["error"],
+            "details": submit_result.get("details", ""),
+        }
 
     job_id = submit_result.get("jobId") or submit_result.get("id", "")
 
@@ -344,6 +361,7 @@ async def set_claimed_job(
                 )
             except Exception as _exc:  # pragma: no cover  # noqa: BLE001
                 import logging as _logging
+
                 _logging.getLogger(__name__).warning(
                     "set_claimed_job: failed to persist fencing token for %s: %s",
                     job_id,
@@ -360,6 +378,7 @@ async def remove_claimed_job(job_id: str) -> None:
                 _db.delete_claimed_job(job_id)
             except Exception as _exc:  # pragma: no cover  # noqa: BLE001
                 import logging as _logging
+
                 _logging.getLogger(__name__).warning(
                     "remove_claimed_job: failed to delete DB record for %s: %s",
                     job_id,
@@ -479,7 +498,9 @@ async def claim_job(job_id: str, ttl_seconds: int = 300) -> dict:
         await get_pending_jobs()
     result = await _api.claim_job(job_id, ttl_seconds=ttl_seconds)
     if not result:
-        return {"error": f"Failed to claim job {job_id} — it may be leased by another worker"}
+        return {
+            "error": f"Failed to claim job {job_id} — it may be leased by another worker"
+        }
     fencing_token = result.get("fencingToken")
     if fencing_token is not None and _job_effect_store is not None:
         _job_effect_store.mark_claimed(
@@ -555,7 +576,9 @@ async def fulfill_job(job_id: str, result: str = "{}") -> dict:
         }
 
     fencing_token = _claimed_jobs.get(job_id, 0)
-    response = await _api.submit_job_result(job_id, result_dict, fencing_token=fencing_token)
+    response = await _api.submit_job_result(
+        job_id, result_dict, fencing_token=fencing_token
+    )
     if response:
         await remove_claimed_job(job_id)
         _db.add_activity("commerce", f"Fulfilled job {job_id}", "x402")
@@ -589,7 +612,9 @@ async def generate_playbook(
     # Build playbook content structure
     playbook_content = {
         "schedule": "Daily: 2-3 posts, 5-10 engagement replies. Weekly: 1 research thread.",
-        "templates": content_by_channel.get(channel, content_by_channel.get("X", []))[:10],
+        "templates": content_by_channel.get(channel, content_by_channel.get("X", []))[
+            :10
+        ],
         "hashtags": [],
         "tactics": [
             "Consistent daily posting with engagement-first approach",
@@ -718,7 +743,9 @@ async def evaluate_marketplace_bid(
         else:
             decision = "counter"
             counter_offer = round(
-                min_acceptable_price_usdc + (listed_price_usdc - min_acceptable_price_usdc) * 0.5, 6
+                min_acceptable_price_usdc
+                + (listed_price_usdc - min_acceptable_price_usdc) * 0.5,
+                6,
             )
             reason = (
                 f"Bid is above minimum but below listed price. "

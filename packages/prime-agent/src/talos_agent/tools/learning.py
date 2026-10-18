@@ -86,7 +86,10 @@ async def run_performance_review() -> dict:
     recent = _db.get_content_with_performance(20)
 
     if not recent or summary.get("total_posts", 0) == 0:
-        return {"status": "insufficient_data", "message": "Not enough performance data yet. Measure more posts first."}
+        return {
+            "status": "insufficient_data",
+            "message": "Not enough performance data yet. Measure more posts first.",
+        }
 
     # Build analysis prompt for LLM
     analysis_data = {
@@ -208,7 +211,10 @@ async def evolve_strategy() -> dict:
     summary = _db.get_performance_summary(14)
 
     if not learnings:
-        return {"status": "no_learnings", "message": "Run performance reviews first to accumulate learnings."}
+        return {
+            "status": "no_learnings",
+            "message": "Run performance reviews first to accumulate learnings.",
+        }
 
     client = get_openai_client(_settings.llm_api_key, _settings.llm_base_url)
     response = await client.chat.completions.create(
@@ -241,7 +247,14 @@ async def evolve_strategy() -> dict:
                             }
                             for learning in learnings
                         ],
-                        "top_performing_content": [{"content": t["content"][:120], "likes": t["likes"], "reposts": t["reposts"]} for t in top],
+                        "top_performing_content": [
+                            {
+                                "content": t["content"][:120],
+                                "likes": t["likes"],
+                                "reposts": t["reposts"],
+                            }
+                            for t in top
+                        ],
                         "audience_segments": audience,
                         "performance_summary_14d": summary,
                     },
@@ -293,4 +306,3 @@ async def evict_expired_learnings() -> dict:
         "evicted": result["evicted"],
         "ids": result["ids"],
     }
-

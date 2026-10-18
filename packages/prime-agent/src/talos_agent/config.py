@@ -85,11 +85,17 @@ class Settings(BaseSettings):
 
     @property
     def llm_model(self) -> str:
-        return self.groq_model if self.secret_value("groq_api_key") else self.openai_model
+        return (
+            self.groq_model if self.secret_value("groq_api_key") else self.openai_model
+        )
 
     @property
     def llm_base_url(self) -> str | None:
-        return "https://api.groq.com/openai/v1" if self.secret_value("groq_api_key") else None
+        return (
+            "https://api.groq.com/openai/v1"
+            if self.secret_value("groq_api_key")
+            else None
+        )
 
     # Model routing (Issue #233) — disabled by default, backward compatible
     model_routing_enabled: bool = Field(
@@ -124,7 +130,7 @@ class Settings(BaseSettings):
         "checks budgets before allowing further calls.",
     )
 
-        # Backup retention policy (Issue #543) — disabled by default, backward compatible
+    # Backup retention policy (Issue #543) — disabled by default, backward compatible
     backup_retention_enabled: bool = Field(
         default=False,
         description="Prune old local backup artifacts after each successful backup, "
@@ -145,7 +151,6 @@ class Settings(BaseSettings):
         description="Maximum age in days of a backup artifact before it is eligible "
         "for pruning. 0 means unlimited (count-based pruning only, if enabled).",
     )
-
 
     # API client response size cap (Issue #561)
     # Hard upper bound on response bodies read from the Talos Web API.  Defaults
@@ -179,7 +184,9 @@ class Settings(BaseSettings):
 
     # Per-channel credential configs for additional adapters.
     # Set as JSON in env: CHANNEL_CONFIGS={"telegram": {"bot_token": "...", "chat_id": "@channel"}}
-    channel_configs: dict = Field(default_factory=dict, description="Per-channel credentials map")
+    channel_configs: dict = Field(
+        default_factory=dict, description="Per-channel credentials map"
+    )
     telegram_bot_token: str = ""
     telegram_chat_id: str = ""
 
@@ -201,10 +208,16 @@ class Settings(BaseSettings):
         default=5, ge=1, le=50, validation_alias="TALOS_TELEGRAM_QUEUE_MAX_ATTEMPTS"
     )
     telegram_queue_max_age_seconds: float = Field(
-        default=3600.0, ge=1, le=604800, validation_alias="TALOS_TELEGRAM_QUEUE_MAX_AGE_SECONDS"
+        default=3600.0,
+        ge=1,
+        le=604800,
+        validation_alias="TALOS_TELEGRAM_QUEUE_MAX_AGE_SECONDS",
     )
     telegram_queue_drain_interval_seconds: float = Field(
-        default=1.0, ge=0.1, le=60, validation_alias="TALOS_TELEGRAM_QUEUE_DRAIN_INTERVAL_SECONDS"
+        default=1.0,
+        ge=0.1,
+        le=60,
+        validation_alias="TALOS_TELEGRAM_QUEUE_DRAIN_INTERVAL_SECONDS",
     )
 
     # Versioned encrypted secret rotation (opt-in for backward compatibility).
@@ -299,34 +312,63 @@ class Settings(BaseSettings):
     @classmethod
     def validate_adapter_retry_configs(cls, value: dict[str, dict]) -> dict[str, dict]:
         for adapter, config in value.items():
-            if not isinstance(adapter, str) or not adapter or not isinstance(config, dict):
-                raise ValueError("adapter retry configs must map adapter names to objects")
+            if (
+                not isinstance(adapter, str)
+                or not adapter
+                or not isinstance(config, dict)
+            ):
+                raise ValueError(
+                    "adapter retry configs must map adapter names to objects"
+                )
             try:
                 CircuitBreakerConfig.from_mapping(config)
             except (TypeError, ValueError) as exc:
-                raise ValueError(f"invalid retry config for adapter '{adapter}'") from exc
+                raise ValueError(
+                    f"invalid retry config for adapter '{adapter}'"
+                ) from exc
         return {adapter.lower(): config for adapter, config in value.items()}
 
     # Policy engine (disabled by default — backward compatible)
-    policy_engine_enabled: bool = Field(default=False, description="Enable the declarative policy engine for autonomous actions")
+    policy_engine_enabled: bool = Field(
+        default=False,
+        description="Enable the declarative policy engine for autonomous actions",
+    )
 
     # Tool permission manifests (audit-only by default — backward compatible).
     # "off" disables the check entirely, "audit" evaluates and logs without
     # blocking, "enforce" denies calls that exceed their manifest or grants.
-    tool_permission_mode: str = Field(default="audit", description="Tool permission enforcement: off | audit | enforce")
+    tool_permission_mode: str = Field(
+        default="audit",
+        description="Tool permission enforcement: off | audit | enforce",
+    )
     # Operator grants as JSON, e.g.
     # TOOL_PERMISSION_GRANTS={"capabilities":["network.http","wallet.read"],"hosts":["*.stellar.org"],"max_spend_usd":"50"}
     # Empty means "use the legacy grant set", which matches pre-manifest behaviour.
-    tool_permission_grants: dict = Field(default_factory=dict, description="Operator-approved capability grants for tools")
+    tool_permission_grants: dict = Field(
+        default_factory=dict,
+        description="Operator-approved capability grants for tools",
+    )
 
     # Agent behaviour
-    agent_cycle_interval: int = Field(default=30, description="Seconds between agent cycles")
+    agent_cycle_interval: int = Field(
+        default=30, description="Seconds between agent cycles"
+    )
     polling_interval: int = Field(default=10, description="Seconds between API polls")
-    heartbeat_interval: int = Field(default=60, description="Seconds between heartbeats")
-    max_iterations: int = Field(default=20, description="Max tool-call iterations per cycle")
-    approval_threshold: Decimal = Field(default=Decimal("10"), description="USD threshold for auto-approval")
-    browser_headless: bool = Field(default=False, description="Run browser in headless mode")
-    auto_repay_loans: bool = Field(default=False, description="Enable automatic loan repayment from treasury")
+    heartbeat_interval: int = Field(
+        default=60, description="Seconds between heartbeats"
+    )
+    max_iterations: int = Field(
+        default=20, description="Max tool-call iterations per cycle"
+    )
+    approval_threshold: Decimal = Field(
+        default=Decimal("10"), description="USD threshold for auto-approval"
+    )
+    browser_headless: bool = Field(
+        default=False, description="Run browser in headless mode"
+    )
+    auto_repay_loans: bool = Field(
+        default=False, description="Enable automatic loan repayment from treasury"
+    )
     tool_timeout_seconds: int = Field(
         default=30,
         ge=1,
@@ -375,10 +417,18 @@ class Settings(BaseSettings):
     talos_job_effect_db_timeout_ms: int = Field(default=5_000, ge=1, le=30_000)
 
     # A2A (Agent-to-Agent) composition timeouts
-    a2a_connect_timeout: float = Field(default=10.0, description="Seconds to wait for A2A TCP connect")
-    a2a_read_timeout: float = Field(default=30.0, description="Seconds to wait for A2A response body")
-    a2a_write_timeout: float = Field(default=10.0, description="Seconds to wait to send A2A request body")
-    a2a_pool_timeout: float = Field(default=5.0, description="Seconds to wait for A2A connection from pool")
+    a2a_connect_timeout: float = Field(
+        default=10.0, description="Seconds to wait for A2A TCP connect"
+    )
+    a2a_read_timeout: float = Field(
+        default=30.0, description="Seconds to wait for A2A response body"
+    )
+    a2a_write_timeout: float = Field(
+        default=10.0, description="Seconds to wait to send A2A request body"
+    )
+    a2a_pool_timeout: float = Field(
+        default=5.0, description="Seconds to wait for A2A connection from pool"
+    )
 
     # Graceful shutdown (#182)
     shutdown_deadline: float = Field(
@@ -390,12 +440,22 @@ class Settings(BaseSettings):
     )
 
     # Dividend distribution
-    dividend_distribution_interval: int = Field(default=3600, description="Seconds between dividend distribution checks")
-    dividend_usdc_threshold: Decimal = Field(default=Decimal("100"), description="USDC threshold to trigger dividend distribution")
+    dividend_distribution_interval: int = Field(
+        default=3600, description="Seconds between dividend distribution checks"
+    )
+    dividend_usdc_threshold: Decimal = Field(
+        default=Decimal("100"),
+        description="USDC threshold to trigger dividend distribution",
+    )
 
     # Execution replay (Issue #235) — disabled by default
-    replay_enabled: bool = Field(default=False, description="Enable execution replay recording for incident analysis")
-    replay_redact_payloads: bool = Field(default=True, description="Redact sensitive values in replay event payloads")
+    replay_enabled: bool = Field(
+        default=False,
+        description="Enable execution replay recording for incident analysis",
+    )
+    replay_redact_payloads: bool = Field(
+        default=True, description="Redact sensitive values in replay event payloads"
+    )
 
     def __init__(self, **kwargs):
         overrides = _json_config_source()
@@ -424,7 +484,9 @@ def ensure_app_dir() -> Path:
     return APP_DIR
 
 
-def resolve_setting_secret(settings: object, name: str, legacy_value: str | None = None) -> str:
+def resolve_setting_secret(
+    settings: object, name: str, legacy_value: str | None = None
+) -> str:
     """Resolve secrets on real Settings while remaining friendly to test doubles."""
     resolver = getattr(type(settings), "secret_value", None)
     if callable(resolver):

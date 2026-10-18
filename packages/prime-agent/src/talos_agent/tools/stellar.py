@@ -33,7 +33,10 @@ def _get_kit() -> StellarKit:
     return _stellar_kit
 
 
-@tool("transfer_xlm", "Transfer XLM to a Stellar account (dividends, payments). Auto-checks approval threshold.")
+@tool(
+    "transfer_xlm",
+    "Transfer XLM to a Stellar account (dividends, payments). Auto-checks approval threshold.",
+)
 async def transfer_xlm(to_account: str, amount: float, reason: str = "") -> dict:
     kit = _get_kit()
     await kit.initialize()
@@ -65,8 +68,13 @@ async def get_xlm_balance() -> dict:
     return await kit.get_balance()
 
 
-@tool("create_pulse_token", "Request Pulse (equity) token creation. Requires Creator approval on Dashboard.")
-async def create_pulse_token(name: str, symbol: str, initial_supply: int = 1000000) -> dict:
+@tool(
+    "create_pulse_token",
+    "Request Pulse (equity) token creation. Requires Creator approval on Dashboard.",
+)
+async def create_pulse_token(
+    name: str, symbol: str, initial_supply: int = 1000000
+) -> dict:
     result = await _api.create_approval(
         _settings.talos_id,
         type_="transaction",
@@ -82,14 +90,22 @@ async def create_pulse_token(name: str, symbol: str, initial_supply: int = 10000
     }
 
 
-@tool("airdrop_pulse", "Distribute Pulse tokens to Patron accounts. Requires Creator approval for large amounts.")
+@tool(
+    "airdrop_pulse",
+    "Distribute Pulse tokens to Patron accounts. Requires Creator approval for large amounts.",
+)
 async def airdrop_pulse(token_id: str, recipients: str) -> dict:
     """recipients: JSON string of [{account: '0.0.xxx', amount: 1000}, ...]"""
     import json as _json
+
     try:
-        recipient_list = _json.loads(recipients) if isinstance(recipients, str) else recipients
+        recipient_list = (
+            _json.loads(recipients) if isinstance(recipients, str) else recipients
+        )
     except _json.JSONDecodeError:
-        return {"error": "recipients must be valid JSON: [{account: '...', amount: N}, ...]"}
+        return {
+            "error": "recipients must be valid JSON: [{account: '...', amount: N}, ...]"
+        }
 
     total_amount = sum(r.get("amount", 0) for r in recipient_list)
     threshold = float(_settings.approval_threshold)
@@ -125,8 +141,13 @@ async def airdrop_pulse(token_id: str, recipients: str) -> dict:
     return {"status": "completed", "transfers": results}
 
 
-@tool("execute_approved_transfer", "Execute a previously approved XLM or token transfer. Call after check_approval returns 'approved'.")
-async def execute_approved_transfer(to_account: str, amount: float, currency: str = "XLM", token_id: str = "") -> dict:
+@tool(
+    "execute_approved_transfer",
+    "Execute a previously approved XLM or token transfer. Call after check_approval returns 'approved'.",
+)
+async def execute_approved_transfer(
+    to_account: str, amount: float, currency: str = "XLM", token_id: str = ""
+) -> dict:
     result = await _api.request_transfer(
         to_account=to_account,
         amount=amount,
@@ -139,11 +160,19 @@ async def execute_approved_transfer(to_account: str, amount: float, currency: st
         # carries a privacy-safe message rather than raw upstream text.
         return attach_stellar_failure(result, failure)
     if result:
-        return {"status": "completed", "to": to_account, "amount": amount, "result": result}
+        return {
+            "status": "completed",
+            "to": to_account,
+            "amount": amount,
+            "result": result,
+        }
     return attach_stellar_failure(None, classify_stellar_failure())
 
 
-@tool("get_pulse_balance", "Check Pulse token balance for a specific account via Mirror Node")
+@tool(
+    "get_pulse_balance",
+    "Check Pulse token balance for a specific account via Mirror Node",
+)
 async def get_pulse_balance(account_id: str, token_id: str) -> dict:
     kit = _get_kit()
     await kit.initialize()

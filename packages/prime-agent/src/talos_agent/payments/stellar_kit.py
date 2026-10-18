@@ -75,9 +75,14 @@ class StellarKit:
                 if r.status_code == 200:
                     data = r.json()
                     balance = data.get("balances", [])
-                    xlm_balance = next((b for b in balance if b.get("asset_type") == "native"), None)
+                    xlm_balance = next(
+                        (b for b in balance if b.get("asset_type") == "native"), None
+                    )
                     if xlm_balance:
-                        return {"balance_xlm": float(xlm_balance["balance"]), "account": acct}
+                        return {
+                            "balance_xlm": float(xlm_balance["balance"]),
+                            "account": acct,
+                        }
                     return {"balance_xlm": 0, "account": acct}
             return attach_stellar_failure(
                 None,
@@ -100,9 +105,15 @@ class StellarKit:
                 if r.status_code == 200:
                     data = r.json()
                     balances = data.get("balances", [])
-                    token_balance = next((b for b in balances if b.get("asset_code") == token_id), None)
+                    token_balance = next(
+                        (b for b in balances if b.get("asset_code") == token_id), None
+                    )
                     balance = float(token_balance["balance"]) if token_balance else 0
-                    return {"balance": balance, "token_id": token_id, "account": account_id}
+                    return {
+                        "balance": balance,
+                        "token_id": token_id,
+                        "account": account_id,
+                    }
             return attach_stellar_failure(
                 None,
                 classify_stellar_failure(status_code=r.status_code),

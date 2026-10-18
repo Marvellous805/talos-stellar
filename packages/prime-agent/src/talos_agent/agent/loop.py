@@ -78,7 +78,9 @@ def _get_tool_timeout(settings: Settings) -> float:
     Invalid or missing values fall back to the safe default, and the timeout
     never exceeds the safe upper bound.
     """
-    raw_timeout = getattr(settings, "tool_timeout_seconds", DEFAULT_TOOL_TIMEOUT_SECONDS)
+    raw_timeout = getattr(
+        settings, "tool_timeout_seconds", DEFAULT_TOOL_TIMEOUT_SECONDS
+    )
     try:
         timeout = float(raw_timeout)
     except (TypeError, ValueError):
@@ -172,12 +174,20 @@ async def agent_loop(
     """
     if settings.model_routing_enabled:
         return await _routed_agent_loop(
-            settings, tools, talos_config, context,
-            system_prompt_override, shutdown_event,
+            settings,
+            tools,
+            talos_config,
+            context,
+            system_prompt_override,
+            shutdown_event,
         )
     return await _legacy_agent_loop(
-        settings, tools, talos_config, context,
-        system_prompt_override, shutdown_event,
+        settings,
+        tools,
+        talos_config,
+        context,
+        system_prompt_override,
+        shutdown_event,
     )
 
 
@@ -200,7 +210,10 @@ async def _legacy_agent_loop(
 
     messages: list[dict] = [
         {"role": "system", "content": system_prompt},
-        {"role": "user", "content": "Decide and execute your next actions based on the current context."},
+        {
+            "role": "user",
+            "content": "Decide and execute your next actions based on the current context.",
+        },
     ]
 
     for iteration in range(settings.max_iterations):
@@ -234,7 +247,10 @@ async def _legacy_agent_loop(
                 {
                     "id": tc.id,
                     "type": "function",
-                    "function": {"name": tc.function.name, "arguments": tc.function.arguments},
+                    "function": {
+                        "name": tc.function.name,
+                        "arguments": tc.function.arguments,
+                    },
                 }
                 for tc in msg.tool_calls
             ]
@@ -260,11 +276,13 @@ async def _legacy_agent_loop(
 
             console.print(f"[dim]Result:[/dim] {result_str[:200]}")
 
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc.id,
-                "content": result_str,
-            })
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tc.id,
+                    "content": result_str,
+                }
+            )
     else:
         console.print("[yellow]Agent hit max iterations limit.[/yellow]")
 
@@ -294,7 +312,10 @@ async def _routed_agent_loop(
 
     messages: list[dict] = [
         {"role": "system", "content": system_prompt},
-        {"role": "user", "content": "Decide and execute your next actions based on the current context."},
+        {
+            "role": "user",
+            "content": "Decide and execute your next actions based on the current context.",
+        },
     ]
 
     for iteration in range(settings.max_iterations):
@@ -313,7 +334,9 @@ async def _routed_agent_loop(
         # Build routing constraints
         constraints = RoutingConstraints(
             task_type=task_type,
-            max_cost_usd=settings.routing_max_cost_usd if settings.routing_max_cost_usd > 0 else None,
+            max_cost_usd=settings.routing_max_cost_usd
+            if settings.routing_max_cost_usd > 0
+            else None,
             preferred_provider=settings.routing_preferred_provider or None,
             require_capabilities={"tool_calling"} if has_tools else set(),
             bypass_fallback=not settings.routing_fallback_enabled,
@@ -334,7 +357,9 @@ async def _routed_agent_loop(
         ) -> dict[str, Any]:
             p = registry.get(provider_name)
             return await p.complete(
-                model=decision.model if provider_name == decision.provider_name else p.metadata.default_model,
+                model=decision.model
+                if provider_name == decision.provider_name
+                else p.metadata.default_model,
                 messages=local_messages,
                 tools=local_tools if local_tools else None,
             )
@@ -363,11 +388,15 @@ async def _routed_agent_loop(
             # No fallback — single provider
             try:
                 response_data = await _complete(
-                    decision.provider_name, messages, tool_schemas if has_tools else None,
+                    decision.provider_name,
+                    messages,
+                    tool_schemas if has_tools else None,
                 )
                 used_provider = decision.provider_name
             except Exception as exc:
-                console.print(f"[red]Provider '{decision.provider_name}' failed: {exc}[/red]")
+                console.print(
+                    f"[red]Provider '{decision.provider_name}' failed: {exc}[/red]"
+                )
                 break
 
         # Track usage
@@ -408,9 +437,15 @@ async def _routed_agent_loop(
 
         # Execute each tool call
         for tc in msg_tool_calls:
-            fn_name = tc["function"]["name"] if isinstance(tc, dict) else tc.function.name
+            fn_name = (
+                tc["function"]["name"] if isinstance(tc, dict) else tc.function.name
+            )
             try:
-                raw_args = tc["function"]["arguments"] if isinstance(tc, dict) else tc.function.arguments
+                raw_args = (
+                    tc["function"]["arguments"]
+                    if isinstance(tc, dict)
+                    else tc.function.arguments
+                )
                 args = json.loads(raw_args)
             except (json.JSONDecodeError, KeyError):
                 args = {}
@@ -423,11 +458,13 @@ async def _routed_agent_loop(
             console.print(f"[dim]Result:[/dim] {result_str[:200]}")
 
             tc_id = tc["id"] if isinstance(tc, dict) else tc.id
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc_id,
-                "content": result_str,
-            })
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tc_id,
+                    "content": result_str,
+                }
+            )
     else:
         console.print("[yellow]Agent hit max iterations limit.[/yellow]")
 

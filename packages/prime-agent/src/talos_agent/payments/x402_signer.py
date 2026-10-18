@@ -43,9 +43,13 @@ class X402Signer:
                 self._wallet_id = wallet["walletId"]
                 self._wallet_address = wallet.get("publicKey") or wallet.get("address")
                 self._initialized = True
-                console.print(f"[green]x402 signer ready (Stellar): {self._wallet_address}[/green]")
+                console.print(
+                    f"[green]x402 signer ready (Stellar): {self._wallet_address}[/green]"
+                )
             else:
-                console.print("[yellow]No agent wallet found. x402 signing disabled.[/yellow]")
+                console.print(
+                    "[yellow]No agent wallet found. x402 signing disabled.[/yellow]"
+                )
         except Exception as e:
             console.print(f"[yellow]x402 signer init failed: {e}[/yellow]")
 
@@ -80,7 +84,9 @@ class X402Signer:
             return {"error": "x402 signer not initialized"}
 
         try:
-            console.print(f"[dim]x402 sign: payee={payee}, amount={amount}, asset={asset_code}[/dim]")
+            console.print(
+                f"[dim]x402 sign: payee={payee}, amount={amount}, asset={asset_code}[/dim]"
+            )
             result = await self._api.sign_payment(
                 payee=payee,
                 amount=amount,
@@ -90,7 +96,9 @@ class X402Signer:
 
             if not result or "error" in result:
                 err_detail = _redact_text(result.get("details", "") if result else "")
-                return {"error": f"{result.get('error', 'Signing request failed')} {err_detail}".strip()}
+                return {
+                    "error": f"{result.get('error', 'Signing request failed')} {err_detail}".strip()
+                }
 
             return {
                 "status": "signed",

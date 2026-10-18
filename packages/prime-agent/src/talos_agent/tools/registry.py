@@ -160,6 +160,7 @@ class ToolRegistry:
                 from talos_agent.policy.middleware import (
                     _GATED_ACTIONS,
                 )
+
                 if name in _GATED_ACTIONS:
                     result = self._middleware.evaluate_action(name, arguments)
                     if result.decision.value == "deny":
@@ -191,6 +192,7 @@ class ToolRegistry:
                 f"tool.{name}",
                 {"tool.name": name, "tool.arg_keys": list(arguments.keys())},
             ):
+
                 async def _invoke_tool() -> Any:
                     try:
                         if inspect.iscoroutinefunction(tool.fn):
@@ -203,9 +205,7 @@ class ToolRegistry:
                     except asyncio.TimeoutError as exc:
                         raise _ToolTimeoutError(str(exc)) from exc
 
-                result = await asyncio.wait_for(
-                    _invoke_tool(), timeout=tool.timeout
-                )
+                result = await asyncio.wait_for(_invoke_tool(), timeout=tool.timeout)
                 return result
         except asyncio.CancelledError:
             outcome = "cancelled"
@@ -231,7 +231,12 @@ class ToolRegistry:
 registry = ToolRegistry()
 
 
-def tool(name: str, description: str, permissions: ToolPermissions | None = None, timeout: float | None = None):
+def tool(
+    name: str,
+    description: str,
+    permissions: ToolPermissions | None = None,
+    timeout: float | None = None,
+):
     """Decorator to register a function as an agent tool.
 
     Usage:
@@ -250,10 +255,12 @@ def tool(name: str, description: str, permissions: ToolPermissions | None = None
     tool name. New tools must declare theirs — an undeclared tool with no
     legacy entry is denied once enforcement is switched on.
     """
+
     def decorator(fn: Callable) -> Callable:
         params = _fn_to_json_schema(fn)
         registry.register(name, description, fn, params, permissions, timeout)
         return fn
+
     return decorator
 
 
@@ -339,7 +346,10 @@ def build_all_tools(
     from talos_agent.adapters.discord import DiscordAdapter, DiscordAdapterConfig
     from talos_agent.adapters.registry import AdapterRegistry
     from talos_agent.adapters.telegram import TelegramAdapter, TelegramAdapterConfig
-    from talos_agent.adapters.telegram_queue import TelegramQueueConfig, TelegramSendQueue
+    from talos_agent.adapters.telegram_queue import (
+        TelegramQueueConfig,
+        TelegramSendQueue,
+    )
     from talos_agent.adapters.x import XAdapter, XAdapterConfig
 
     if settings.adapter_sandbox_enabled:
@@ -370,10 +380,9 @@ def build_all_tools(
                 secrets=sandbox.secrets("x"),
             )
         )
-        if (
-            resolve_setting_secret(settings, "discord_webhook_url")
-            or resolve_setting_secret(settings, "discord_bot_token")
-        ):
+        if resolve_setting_secret(
+            settings, "discord_webhook_url"
+        ) or resolve_setting_secret(settings, "discord_bot_token"):
             adapter_registry.register(
                 DiscordAdapter(
                     DiscordAdapterConfig(
@@ -394,7 +403,9 @@ def build_all_tools(
                     secrets=sandbox.secrets("telegram"),
                     http=sandbox.http("telegram"),
                     queue=(
-                        TelegramSendQueue(db, TelegramQueueConfig.from_settings(settings))
+                        TelegramSendQueue(
+                            db, TelegramQueueConfig.from_settings(settings)
+                        )
                         if settings.telegram_rate_limit_enabled
                         else None
                     ),
@@ -403,10 +414,9 @@ def build_all_tools(
     else:
         adapter_registry = AdapterRegistry()
         adapter_registry.register(XAdapter(browser, settings))
-        if (
-            resolve_setting_secret(settings, "discord_webhook_url")
-            or resolve_setting_secret(settings, "discord_bot_token")
-        ):
+        if resolve_setting_secret(
+            settings, "discord_webhook_url"
+        ) or resolve_setting_secret(settings, "discord_bot_token"):
             adapter_registry.register(DiscordAdapter(settings))
 
     # Inject dependencies into tool modules
