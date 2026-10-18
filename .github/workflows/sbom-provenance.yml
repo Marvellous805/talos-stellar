@@ -593,8 +593,8 @@ jobs:
           BASE="${OUT_DIR}/talos-agent-${SAFE_REF}-$TS"
 
           cyclonedx-py environment \
-            --output-format json \
-            --output "${BASE}.cdx.json" \
+            --output-format JSON \
+            --output-file "${BASE}.cdx.json" \
             --pyproject pyproject.toml \
             2>&1 | tee "${BASE}.cdx.log" || {
               echo "::warning::cyclonedx-py failed, generating fallback"

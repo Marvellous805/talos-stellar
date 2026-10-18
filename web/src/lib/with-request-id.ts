@@ -21,8 +21,9 @@ export function withRequestId<H extends RequestRouteHandler>(handler: H): H;
 export function withRequestId<H extends NextRequestRouteHandler>(handler: H): H;
 export function withRequestId(handler: NextRequestRouteHandler): NextRequestRouteHandler {
   return (async (req: NextRequest, ...rest: unknown[]) => {
-    const requestId = getRequestId(req);
-    const res = await handler(req, ...rest);
+    const request = req ?? new NextRequest("http://localhost/");
+    const requestId = getRequestId(request);
+    const res = await handler(request, ...rest);
     const newRes = new Response(res.body, res);
     newRes.headers.set("x-request-id", requestId);
     return newRes;

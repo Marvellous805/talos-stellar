@@ -340,13 +340,13 @@ export class TalosWebhook {
     // window, otherwise a dedup entry can expire while the timestamp is still
     // accepted, opening a replay attack vector.
     if (replayWindowSeconds !== undefined) {
-      if (!Number.isInteger(replayWindowSeconds) || replayWindowSeconds <= 0) {
+      if (!Number.isInteger(replayWindowSeconds) || replayWindowSeconds < 0 || (replayWindowSeconds === 0 && toleranceSeconds > 0)) {
         logger?.error(
-          "Webhook verification misconfigured: replayWindowSeconds must be a positive integer",
+          "Webhook verification misconfigured: replayWindowSeconds must be a non-negative integer and positive when tolerance is enabled",
           { replayWindowSeconds },
         );
         throw new TalosWebhookError(
-          "replayWindowSeconds must be a positive integer",
+          "replayWindowSeconds must be a non-negative integer and positive when tolerance is enabled",
           "REPLAY_MISCONFIGURED",
         );
       }
