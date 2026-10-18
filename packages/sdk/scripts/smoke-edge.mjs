@@ -32,6 +32,7 @@ console.log("[compat:edge] dist size:", statSync(ESM_ENTRY).size, "bytes (main)"
 
 // Build a browser/edge-like sandbox. Deliberately no Node globals.
 const edgeGlobal = {
+  Networks: { PUBLIC: "Public Global Stellar Network ; September 2015", TESTNET: "Test SDF Network ; September 2015", FUTURENET: "Test SDF Future Network ; October 2022", STANDALONE: "Standalone Network ; February 2017" },
   globalThis: undefined,
   TextEncoder,
   TextDecoder,
