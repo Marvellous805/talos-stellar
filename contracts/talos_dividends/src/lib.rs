@@ -788,6 +788,24 @@ mod tests {
             )
     }
 
+    /// Helper for claims using the default 60/25/15 share split.
+    #[allow(clippy::too_many_arguments)]
+    fn do_claim(
+        env: &Env,
+        contract_id: &Address,
+        client: &TalosDividendsClient<'static>,
+        claimant: &Address,
+        talos_id: u32,
+        epoch_id: u64,
+        creator: &Address,
+        investor: &Address,
+        treasury: &Address,
+    ) -> i128 {
+        do_claim_with_shares(
+            env, contract_id, client, claimant, talos_id, epoch_id,
+            creator, investor, treasury, 60, 25, 15,
+        )
+    }
     /// Like `do_claim` but uses `try_claim_dividend` to surface errors.
     /// Returns the raw soroban-sdk 21 result: `Ok(Ok(allocation))` on success,
     /// `Ok(Err(_))` when the contract returns an error, `Err(_)` on host error.

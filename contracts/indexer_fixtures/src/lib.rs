@@ -1077,11 +1077,11 @@ mod tests {
         let ns_id = env.register_contract(None, TalosNameService);
 
         let ns_client = TalosNameServiceClient::new(&env, &ns_id);
-        ns_client.initialize(&registry_id);
-
-        let reg_client = TalosRegistryClient::new(&env, &registry_id);
         let owner = Address::generate(&env);
         let protocol_wallet = Address::generate(&env);
+        ns_client.initialize(&registry_id, &owner, &10_i128);
+
+        let reg_client = TalosRegistryClient::new(&env, &registry_id);
 
         let talos_id = reg_client
             .mock_auths(&[MockAuth {

@@ -594,9 +594,8 @@ jobs:
 
           cyclonedx-py environment \
             --output-format JSON \
-            --output-file "${BASE}.cdx.json" \
             --pyproject pyproject.toml \
-            2>&1 | tee "${BASE}.cdx.log" || {
+            > "${BASE}.cdx.json" 2> >(tee "${BASE}.cdx.log" >&2) || {
               echo "::warning::cyclonedx-py failed, generating fallback"
               python3 << PYEOF
           import json, tomllib, uuid, os

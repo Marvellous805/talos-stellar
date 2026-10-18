@@ -342,11 +342,11 @@ export class TalosWebhook {
     if (replayWindowSeconds !== undefined) {
       if (!Number.isInteger(replayWindowSeconds) || replayWindowSeconds < 0 || (replayWindowSeconds === 0 && toleranceSeconds > 0)) {
         logger?.error(
-          "Webhook verification misconfigured: replayWindowSeconds must be a non-negative integer and positive when tolerance is enabled",
+          "Webhook verification misconfigured: replayWindowSeconds must be a positive integer, except zero is allowed when toleranceSeconds is 0",
           { replayWindowSeconds },
         );
         throw new TalosWebhookError(
-          "replayWindowSeconds must be a non-negative integer and positive when tolerance is enabled",
+          "replayWindowSeconds must be a positive integer, except zero is allowed when toleranceSeconds is 0",
           "REPLAY_MISCONFIGURED",
         );
       }

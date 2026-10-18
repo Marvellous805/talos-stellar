@@ -87,6 +87,7 @@ export * from "./types.js";
 // ── Stellar helpers ───────────────────────────────────────────────
 
 export * from "./stellar.js";
+export * from "./seller-quote.js";
 export * from "./webhooks.js";
 export * from "./a2a-intent.js";
 export * from "./a2a-validation.js";
