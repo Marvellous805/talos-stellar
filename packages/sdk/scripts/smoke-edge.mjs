@@ -178,6 +178,10 @@ const IMPORT_LINE =
   /^import\s+(?:(?:\{[^}]*\}|\*\s+as\s+[A-Za-z0-9_$]+|[A-Za-z0-9_$]+(?:\s*,\s*\{[^}]*\})?)\s+from\s+)?["']([^"']+)["'];?\s*$/;
 
 function stripImportsExports(src) {
+  // ESM tooling may wrap re-export lists across multiple lines. Remove those
+  // blocks before line-by-line processing so no bare `export` reaches vm.Script.
+  src = src.replace(/^export\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];?\s*$/gm, "");
+  src = src.replace(/^export\s*\{([\s\S]*?)\}\s*;?\s*$/gm, (_, names) => `export { ${names.replace(/\s+/g, " ").trim()} };`);
   const lines = src.split(/\r?\n/);
   const out = [];
   const deferred = [];

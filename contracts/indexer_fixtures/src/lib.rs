@@ -1083,26 +1083,8 @@ mod tests {
 
         let reg_client = TalosRegistryClient::new(&env, &registry_id);
 
-        let talos_id = reg_client
-            .mock_auths(&[MockAuth {
-                address: &owner,
-                invoke: &MockAuthInvoke {
-                    contract: &registry_id,
-                    fn_name: "create_talos",
-                    args: (
-                        s(&env, "genesis"),
-                        s(&env, "Marketing"),
-                        s(&env, "desc"),
-                        patron(&env, &owner),
-                        kernel(),
-                        pulse(&env),
-                        protocol_wallet.clone(),
-                    )
-                        .into_val(&env),
-                    sub_invokes: &[],
-                },
-            }])
-            .create_talos(
+        env.mock_all_auths();
+        let talos_id = reg_client.create_talos(
                 &s(&env, "genesis"),
                 &s(&env, "Marketing"),
                 &s(&env, "desc"),
