@@ -722,7 +722,6 @@ mod tests {
                 },
             }])
             .commit_epoch(admin, &talos_id, &total_amount, &expiry_secs)
-            .unwrap()
     }
 
     /// Helper: commit a default epoch (total=10_000, expiry=7_200s).
@@ -760,6 +759,9 @@ mod tests {
         creator: &Address,
         investor: &Address,
         treasury: &Address,
+        creator_share: u32,
+        investor_share: u32,
+        treasury_share: u32,
     ) -> i128 {
         client
             .mock_auths(&[MockAuth {
@@ -1106,8 +1108,7 @@ mod tests {
         do_claim_with_shares(
             &env, &contract_id, &client, &creator, talos_id, epoch_id, &creator, &investor,
             &treasury, 60, 25, 15,
-        )
-        .unwrap();
+        );
 
         assert_eq!(client.get_rounding_dust(&talos_id, &epoch_id), Some(1));
         let events = env.events().all();
@@ -1134,13 +1135,12 @@ mod tests {
         let treasury = Address::generate(&env);
         let epoch_id = commit_epoch(&env, &contract_id, &client, &admin, talos_id, 101, 7_200);
 
-        do_claim(&env, &contract_id, &client, &creator, talos_id, epoch_id, &creator, &investor, &treasury)
-            .unwrap();
-        let result = do_claim_with_shares(
+        do_claim(&env, &contract_id, &client, &creator, talos_id, epoch_id, &creator, &investor, &treasury);
+        let result = try_claim_with_shares(
             &env, &contract_id, &client, &investor, talos_id, epoch_id, &creator, &investor,
             &treasury, 61, 24, 15,
         );
-        assert_eq!(result, Err(ContractError::InconsistentShareData));
+        assert_eq!(result, Err(Ok(ContractError::InconsistentShareData)));
         assert!(!client.has_claimed(&epoch_id, &investor));
     }
 
@@ -1153,8 +1153,7 @@ mod tests {
         let treasury = Address::generate(&env);
         let epoch_id = commit_epoch(&env, &contract_id, &client, &admin, talos_id, 101, 7_200);
 
-        do_claim(&env, &contract_id, &client, &creator, talos_id, epoch_id, &creator, &investor, &treasury)
-            .unwrap();
+        do_claim(&env, &contract_id, &client, &creator, talos_id, epoch_id, &creator, &investor, &treasury);
         env.ledger().with_mut(|li| li.timestamp = 9_000);
 
         let recovered = client
