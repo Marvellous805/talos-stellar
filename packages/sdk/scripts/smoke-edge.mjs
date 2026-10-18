@@ -167,6 +167,28 @@ const files = [];
   }
 })(ESM_DIR);
 files.sort();
+// Preserve source module dependencies when flattening ESM into a script.
+const fileSet = new Set(files.map((file) => resolve(file)));
+const orderedFiles = [];
+const visited = new Set();
+const visiting = new Set();
+function visitModule(file) {
+  const absolute = resolve(file);
+  if (visited.has(absolute) || visiting.has(absolute)) return;
+  visiting.add(absolute);
+  const source = readFileSync(absolute, "utf8");
+  const dependencyPattern = /(?:import|export)\s+(?:[^"']*?\s+from\s+)?["'](\.\.?\/[^"']+)["']/g;
+  for (const match of source.matchAll(dependencyPattern)) {
+    const dependency = resolve(dirname(absolute), match[1]);
+    const withExtension = dependency.endsWith(".js") ? dependency : `${dependency}.js`;
+    if (fileSet.has(withExtension)) visitModule(withExtension);
+  }
+  visiting.delete(absolute);
+  visited.add(absolute);
+  orderedFiles.push(absolute);
+}
+for (const file of files) visitModule(file);
+files.splice(0, files.length, ...orderedFiles);
 
 console.log(`[compat:edge] concatenating ${files.length} ESM files`);
 
