@@ -1,18 +1,35 @@
-/** Public feature flags exposed by this SDK build. */
-export const FeatureFlags = Object.freeze({
-  pagination: true,
-  requestSigning: true,
-  typedErrors: true,
-  webhooks: true,
-} as const);
+/**
+ * Feature Detection utilities for TALOS SDK.
+ */
 
-export type FeatureName = keyof typeof FeatureFlags;
-export type FeatureStatus = "supported" | "unsupported";
+export enum FeatureStatus {
+  AVAILABLE = "available",
+  UNAVAILABLE = "unavailable",
+  EXPERIMENTAL = "experimental",
+  DEPRECATED = "deprecated",
+}
 
-/** Safely report whether a named SDK capability is available. */
-export function detectFeature(feature: string): FeatureStatus {
-  return Object.prototype.hasOwnProperty.call(FeatureFlags, feature)
-    && FeatureFlags[feature as FeatureName]
-    ? "supported"
-    : "unsupported";
+export const FeatureFlags = {
+  CHAOS_INJECTION: "chaos_injection",
+  SIGNING: "signing",
+  IDEMPOTENCY: "idempotency",
+  PROPOSALS: "proposals",
+  MARKETPLACE: "marketplace",
+} as const;
+
+export type FeatureFlag = (typeof FeatureFlags)[keyof typeof FeatureFlags] | string;
+
+export interface FeatureDetectionResult {
+  name: string;
+  available: boolean;
+  status: FeatureStatus;
+}
+
+export function detectFeature(feature: FeatureFlag): FeatureDetectionResult {
+  const isAvailable = Object.values(FeatureFlags).includes(feature as any);
+  return {
+    name: String(feature),
+    available: isAvailable,
+    status: isAvailable ? FeatureStatus.AVAILABLE : FeatureStatus.UNAVAILABLE,
+  };
 }

@@ -1,12 +1,20 @@
 // ── Client ────────────────────────────────────────────────────────
 
-export { TalosClient, resolveRetryPolicy, resolveRetryOptions } from "./client.js";
+export {
+  TalosClient,
+  resolveRetryPolicy,
+  resolveRetryOptions,
+} from "./client.js";
 export type {
   TalosClientOptions,
   RetryPolicyOptions,
   RetryOptions,
+  ResolvedRetryPolicy,
+  ResolvedRetryOptions,
   TalosErrorEvent,
+  ReadOptions,
   WriteOptions,
+  ReadOptions,
 } from "./client.js";
 
 // ── Pagination ─────────────────────────────────────────────────────
@@ -77,8 +85,8 @@ export {
 export {
   detectFeature,
   FeatureFlags,
+  FeatureStatus,
 } from "./features.js";
-export type { FeatureName, FeatureStatus } from "./features.js";
 
 // ── Domain types ──────────────────────────────────────────────────
 
@@ -87,11 +95,23 @@ export * from "./types.js";
 // ── Stellar helpers ───────────────────────────────────────────────
 
 export * from "./stellar.js";
-export * from "./seller-quote.js";
 export * from "./webhooks.js";
 export * from "./a2a-intent.js";
 export * from "./a2a-validation.js";
 export * from "./a2a-operations.js";
+export {
+  DEFAULT_SELLER_QUOTE_TTL_SECONDS,
+  SellerQuoteError,
+  constructSellerQuote,
+  constructSellerPaymentDetails,
+  toCanonicalDecimalAmount,
+} from "./seller-quote.js";
+export type {
+  ConstructSellerQuoteParams,
+  ConstructSellerPaymentDetailsParams,
+  SellerPaymentDetails,
+  SellerQuoteErrorCode,
+} from "./seller-quote.js";
 export {
   TalosEventStream,
   TalosStreamError,
@@ -252,3 +272,12 @@ export {
   GENERATED_TYPES_PACKAGE,
 } from "./provenance.js";
 export type { GeneratedTypesProvenance } from "./provenance.js";
+
+// ── Drift detection ──────────────────────────────────────────────────────────
+export { DriftDetector, DriftError } from "./drift.js";
+export type {
+  DriftMode,
+  UnknownFieldPolicy,
+  DriftViolation,
+  DriftDetectorOptions,
+} from "./drift.js";
