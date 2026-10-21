@@ -11,6 +11,7 @@ from pydantic import Field, PrivateAttr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from talos_agent.circuit_breaker import CircuitBreakerConfig
+from talos_agent.http import validate_tool_timeout
 
 APP_DIR = Path.home() / ".talos-agent"
 
@@ -339,6 +340,19 @@ class Settings(BaseSettings):
         description="Enable the declarative policy engine for autonomous actions",
     )
 
+    # Demo commerce mode (Issue #879) — disabled by default.
+    # When enabled, the system prompt includes aggressive purchasing instructions
+    # ("buy immediately", demo-environment notices, BE AGGRESSIVE).
+    # Production deployments must leave this off.
+    demo_commerce_mode: bool = Field(
+        default=False,
+        description=(
+            "Emit aggressive demo-purchasing guidance in the system prompt "
+            "(buy-immediately instructions, demo-environment notice, BE AGGRESSIVE). "
+            "Off by default — safe for production. Enable only for live demos."
+        ),
+    )
+
     # Tool permission manifests (audit-only by default — backward compatible).
     # "off" disables the check entirely, "audit" evaluates and logs without
     # blocking, "enforce" denies calls that exceed their manifest or grants.
@@ -373,13 +387,37 @@ class Settings(BaseSettings):
     )
     auto_repay_loans: bool = Field(
         default=False, description="Enable automatic loan repayment from treasury"
-    )
-    tool_timeout_seconds: int = Field(
+    )    tool_timeout_seconds: int = Field(
         default=30,
         ge=1,
         le=120,
         validation_alias="TALOS_TOOL_TIMEOUT_SECONDS",
         description="Maximum seconds for a single external tool call before it is cancelled.",
+    )
+
+    # Content history and research note bounds (Issue #974)
+    content_history_max_limit: int = Field(
+        default=50,
+        ge=1,
+        le=500,
+        validation_alias="TALOS_CONTENT_HISTORY_MAX_LIMIT",
+        description=(
+            "Hard cap on the limit passed to get_content_history. "
+            "LLM-provided values above this are clamped down to it, "
+            "preventing unbounded rows from entering the prompt context."
+        ),
+    )
+    research_notes_max_bytes: int = Field(
+        default=4096,
+        ge=64,
+        le=131072,
+        validation_alias="TALOS_RESEARCH_NOTES_MAX_BYTES",
+        description=(
+            "Maximum byte length of a research note stored via "
+            "save_research_notes. Longer notes are truncated and a "
+            "truncation marker is appended so downstream consumers "
+            "and the audit trail can tell the difference."
+        ),
     )
 
     # Job leasing
@@ -446,20 +484,34 @@ class Settings(BaseSettings):
 
     # Dividend distribution
     dividend_distribution_interval: int = Field(
-        default=3600, description="Seconds between dividend distribution checks"
+        default=3600,
+        description="Seconds between dividend distribution checks",
     )
     dividend_usdc_threshold: Decimal = Field(
         default=Decimal("100"),
         description="USDC threshold to trigger dividend distribution",
     )
 
-    # Execution replay (Issue #235) — disabled by default
+    # Deterministic replay (disabled by default for safe rollout)
     replay_enabled: bool = Field(
         default=False,
-        description="Enable execution replay recording for incident analysis",
+        description="Enable recording of agent cycle events for deterministic replay.",
+    )
+    replay_max_events: int = Field(
+        default=500,
+        description="Maximum events to capture per cycle (excess silently dropped).",
+    )
+    replay_max_payload_bytes: int = Field(
+        default=65536,
+        description="Maximum bytes per event payload; oversized payloads are truncated.",
+    )
+    replay_keep_sessions: int = Field(
+        default=100,
+        description="Number of replay sessions to keep; oldest are pruned automatically.",
     )
     replay_redact_payloads: bool = Field(
-        default=True, description="Redact sensitive values in replay event payloads"
+        default=True,
+        description="Redact sensitive values in replay event payloads.",
     )
 
     def __init__(self, **kwargs):
