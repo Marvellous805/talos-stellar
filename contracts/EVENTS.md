@@ -80,6 +80,10 @@ is idempotent per cursor (see §4).
 
 `cfg_upd` is emitted once after a successful `update_config` call. Its data includes both the previous and new values for every governance parameter, including the Pulse token address.
 
+| (`adm_prp`,) | EventAdminProposed | admin transfer proposed |
+| (`adm_acc`,) | EventAdminAccepted | admin transfer accepted |
+| (`adm_cnl`,) | EventAdminTransferCancelled | admin transfer cancelled |
+
 `qrm_rchd` is emitted **at most once** per proposal, on the first vote that brings `votes_cast` to or above `quorum_threshold`. A `DataKey::QuorumReached(proposal_id)` sentinel prevents re-emission for subsequent votes.
 
 ### talos_name_service
