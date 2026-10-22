@@ -37,7 +37,7 @@ import { withRequestId } from "@/lib/with-request-id";
  *    insert + purchase status=completed + cached response)
  */
 async function _POST(
-  request: NextRequest,
+  request: Request | NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
