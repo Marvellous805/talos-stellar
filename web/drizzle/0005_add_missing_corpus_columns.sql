@@ -1,6 +1,6 @@
 -- Add missing columns to tls_talos that were defined in schema but never migrated
-ALTER TABLE "tls_talos" ADD COLUMN IF NOT EXISTS "onChainId" integer;
-ALTER TABLE "tls_talos" ADD COLUMN IF NOT EXISTS "agentName" text;
+ALTER TABLE "tls_talos" ADD COLUMN IF NOT EXISTS "onChainId" integer UNIQUE;
+ALTER TABLE "tls_talos" ADD COLUMN IF NOT EXISTS "agentName" text UNIQUE;
 ALTER TABLE "tls_talos" ADD COLUMN IF NOT EXISTS "investorPublicKey" text;
 ALTER TABLE "tls_talos" ADD COLUMN IF NOT EXISTS "treasuryPublicKey" text;
 ALTER TABLE "tls_talos" ADD COLUMN IF NOT EXISTS "agentWalletId" text;

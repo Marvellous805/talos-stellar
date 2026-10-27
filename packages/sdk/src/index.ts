@@ -85,6 +85,14 @@ export type { RateLimitInfo, HeaderSource } from "./errors.js";
 
 export * from "./types.js";
 
+// ── Name validation ────────────────────────────────────────────────
+
+export {
+  validateName,
+  canonicalizeName,
+  validateAndCanonicalizeName,
+} from "./name-validation.js";
+
 // ── Stellar helpers ───────────────────────────────────────────────
 
 export * from "./stellar.js";
